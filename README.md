@@ -1,1 +1,1 @@
-# code_similarity
+# InferCode Variant
