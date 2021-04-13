@@ -109,7 +109,7 @@ def train2(model, data_reader, label_generator, batch_size, start_epoch = 0, epo
         print("epoch", epoch, "loss : ", epoch_loss.item())
 
         # save the model at different epochs
-        if epoch == 9 or epoch == 24 or epoch == 49 or epoch == 74 or epoch == 99:
-             torch.save(model.state_dict(), "/home/stanley/Desktop/code_similarity/model_weights/epoch_"+str(epoch+1)+".pkl")
+        if epoch % 2 == 0:
+             torch.save(model.state_dict(), "/home/stanley/Desktop/model_weights/epoch_"+str(epoch+1)+".pkl")
 
     return model

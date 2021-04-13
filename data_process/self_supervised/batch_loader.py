@@ -141,17 +141,17 @@ class Batch_Loader:
             window_global_index = node_index+window_global_starting_index
 
             # append data for the current node
-            windowed_tree_node_types.append(self.data_reader.type2id.get(node.tag))
+            windowed_tree_node_types.append(self.data_reader.type2id.get(node.tag) if self.data_reader.type2id.get(node.tag) != None else self.data_reader.type2id.get("unknown_type"))
             windowed_tree_node_tokens.append(self.data_reader.token2id.get(node.text) if self.data_reader.token2id.get(node.text) != None else self.data_reader.token2id.get("unknown_token"))
             windowed_node_indices.append(window_global_index)
-            
+           
             eta_t.append(1) # eta_t will always be 1 for the parent
             eta_r.append(0) # eta_r will always be 0 for the parent
             eta_l.append(0) # eta_l will always be 0 for the parent
 
             # move on to direct children if the node has direct descendent
             for child_index, child in enumerate(node):
-                windowed_tree_node_types.append(self.data_reader.type2id.get(child.tag))
+                windowed_tree_node_types.append(self.data_reader.type2id.get(child.tag) if self.data_reader.type2id.get(node.tag) != None else self.data_reader.type2id.get("unknown_type"))
                 windowed_tree_node_tokens.append(self.data_reader.token2id.get(child.text) if self.data_reader.token2id.get(child.text) != None else self.data_reader.token2id.get("unknown_token"))
                 windowed_node_indices.append(window_global_index) # record the same window global index for scatter add because this child node belong to the same window of the parent node
                     

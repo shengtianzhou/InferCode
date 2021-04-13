@@ -39,11 +39,11 @@ class InferCode_Inference:
 
         self.model.load_state_dict(torch.load(self.model_path))
     
-    def code2vec(self, file_path):
+    def code2vec(self, file_path, tree = False):
         '''
         produce a code embedding from the model for a single code snippet
         '''
-        file_reader = data_reader.Data_Reader(file_path, train=False)
+        file_reader = data_reader.Data_Reader(file_path, train=False, tree = tree)
         file_reader.token2id = self.token2id
         file_reader.type2id = self.type2id
         lg = label_generator.LabelGenerator(file_reader, train = False)

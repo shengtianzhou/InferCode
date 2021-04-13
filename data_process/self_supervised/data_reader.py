@@ -19,8 +19,8 @@ class Data_Reader:
     6. It builds the token to index dictionary.
     7. It builds the index to token dictionary.
     '''
-    def __init__(self, data_path, train = True):
-        
+    def __init__(self, data_path, train = True, tree = False):
+    
         #public
         self.path = data_path
         self.processed_dataset = [] # a dataset of processed ast, ElementTree
@@ -36,6 +36,7 @@ class Data_Reader:
         self.__type_id = 0
         self.__filter_threshold = 5 # the threshold to discard a token if it appears less than the threshold number
         self.__train = train
+        self.__etree = tree # indicates if the input data_path is actually an etree object
         
         self.__parse_data()
         
@@ -45,8 +46,25 @@ class Data_Reader:
         '''
         collect each indivisual xml file path and parse them to cleaned AST
         '''
-        file_paths = self.__collect_paths_of_AST()
+
+        # if the input is a single ET.ElementTree object
+        if self.__etree:
+            processed_tree = self.__process_tree(self.path)
+            self.processed_dataset.append(processed_tree)
+            # we dont need to construct the dictionary
+            self.size = len(self.processed_dataset)
+            return
+
+        # otherwise
+        file_paths = []
         
+        if self.__train:
+            # if training, then the specified self.path is a folder that contains xml files
+            file_paths = self.__collect_paths_of_AST()
+        else:
+            # during inference, assume the self.path is the concrete path to that xml file
+            file_paths.append(self.path)
+
         if self.__train:
             file_paths = tqdm(file_paths, desc = "Data Processing : ")
 
