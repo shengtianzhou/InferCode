@@ -17,7 +17,7 @@ class InferCode(nn.Module):
         self.embedding_type = nn.Embedding(type_size, dim)
         self.embedding_token = nn.Embedding(token_size, dim)
 
-        # a linear layer for combing type and token for producing a node hidden state
+        # a linear layer for combining type and token for producing a node hidden state
         self.encoder_hidden = nn.Linear(2*dim, dim)
 
         # weight matrix for top, left, and right

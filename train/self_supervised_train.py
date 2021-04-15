@@ -16,7 +16,7 @@ def train1(model, batched_dataset, epochs = 10, lrate = 0.0025):
     device = torch.device(dev)
 
     # declare the optimizer
-    optimizer = optim.Adam(model.parameters(), lr = lrate)
+    optimizer = optim.Adam(model.parameters(), lr = lrate, momentum=0.9)
 
     # declare the loss function, multi-class multi-label classification
     criterion = torch.nn.BCEWithLogitsLoss() # returns the loss as a 1d tensor
@@ -110,6 +110,6 @@ def train2(model, data_reader, label_generator, batch_size, start_epoch = 0, epo
 
         # save the model at different epochs
         if epoch % 2 == 0:
-             torch.save(model.state_dict(), "/home/stanley/Desktop/model_weights/epoch_"+str(epoch+1)+".pkl")
+             torch.save(model.state_dict(), "/home/stanley/Desktop/momentum_model_weight/epoch_"+str(epoch+1)+".pkl")
 
     return model

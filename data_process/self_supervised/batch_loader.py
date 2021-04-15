@@ -97,13 +97,13 @@ class Batch_Loader:
 
                 batch_tree_indices.extend([batch_tree_index]*len(list(self.data_reader.processed_dataset[tree_index].getroot().iter()))) # duplicate tree_index for the number of nodes in this tree
                 batch_tree_index += 1
-
+            
                 if self.train:
                     # prepare batch_labels, a multi-hot vector for each label
                     multi_hot_vector = np.zeros(len(self.label_generator.subtree2id))
                     multi_hot_vector.put(self.label_generator.labels[tree_index], 1)
                     batch_labels.append(multi_hot_vector.tolist())
-                
+
             # set the starting index for the next batch
             tree_base_index = tree_base_index + next_batch_size
 
@@ -134,7 +134,8 @@ class Batch_Loader:
         eta_t = [] # default eta_t is 1 for leaf node that acts as parent
         eta_l = [] # default eta_l is 0 for leaf node that acts as parent, 1/2 if there is only 1 child node
         eta_r = [] # default eta_r is 0 for leaf node that acts as parent, 1/2 if there is only 1 child node
-
+        
+        # each iteration constructs a window of node data
         for node_index, node in enumerate(self.data_reader.processed_dataset[tree_index].getroot().iter()):
             
             # calculate the index for the current node in global node indices
@@ -148,10 +149,10 @@ class Batch_Loader:
             eta_t.append(1) # eta_t will always be 1 for the parent
             eta_r.append(0) # eta_r will always be 0 for the parent
             eta_l.append(0) # eta_l will always be 0 for the parent
-
+            
             # move on to direct children if the node has direct descendent
             for child_index, child in enumerate(node):
-                windowed_tree_node_types.append(self.data_reader.type2id.get(child.tag) if self.data_reader.type2id.get(node.tag) != None else self.data_reader.type2id.get("unknown_type"))
+                windowed_tree_node_types.append(self.data_reader.type2id.get(child.tag) if self.data_reader.type2id.get(child.tag) != None else self.data_reader.type2id.get("unknown_type"))
                 windowed_tree_node_tokens.append(self.data_reader.token2id.get(child.text) if self.data_reader.token2id.get(child.text) != None else self.data_reader.token2id.get("unknown_token"))
                 windowed_node_indices.append(window_global_index) # record the same window global index for scatter add because this child node belong to the same window of the parent node
                     
@@ -163,7 +164,7 @@ class Batch_Loader:
                 eta_t.append(child_eta_t) 
                 eta_r.append(child_eta_r)
                 eta_l.append(child_eta_l)
-
+        
         return windowed_tree_node_types, windowed_tree_node_tokens, windowed_node_indices, eta_t, eta_l, eta_r
 
     def __eta_t(self, di, d=2):

@@ -73,7 +73,7 @@ class LabelGenerator:
         '''
         produces a sequentialized subtree as a string
         '''
-        # assume the tree will always has a rootnode
+        # assume the tree will always have a root node
         sequentialized = ""
         node = subtree_root
         node_level = 1 # 1 is the top-most level

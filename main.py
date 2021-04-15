@@ -53,8 +53,9 @@ def main():
         # hyper parameters
         batch_size = 16
         dimension = 64
-        epochs = 75
-        lrate = 0.0025
+        epochs = 20
+        #lrate = 0.0025
+        lrate = 0.01
         single_batching = True # used to determine prepare batch dataset before training or through the training
 
         # process data
