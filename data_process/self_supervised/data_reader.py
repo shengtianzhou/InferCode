@@ -98,11 +98,19 @@ class Data_Reader:
         '''
 
         for node in tree.getroot().iter():
-            # clean and build AST node tags
+            # add filtering steps here for node tags (type) and texts (token)
+            # tag filtering (type)
             node.tag = self.__remove_bracket_content_from_tag(node.tag)
             node.tag = self.__serialize_tag_and_attributes(node.tag, node.attrib.values())
             node.tag = self.__simplify_root_tag(node.tag)
-        
+            
+
+            # text filtering (token)
+            # add new code for training the model, comment out to get the original data reader
+            node.text = self.__remove_space(node.text)
+            node.text = self.__remove_newline(node.text)
+            node.text = self.__to_lower(node.text)
+
             # construct the dictionaries
             if node.tag not in self.type2id:
                 self.type2id[node.tag] = self.__type_id
@@ -117,6 +125,21 @@ class Data_Reader:
 
         processed_tree = tree # tree is now processed
         return processed_tree
+
+    def __remove_space(self, text):
+        if isinstance(text, str):
+            return text.replace(" ", "")
+        return text
+
+    def __remove_newline(self, text):
+        if isinstance(text, str):
+            return text.replace("\n", "")
+        return text
+
+    def __to_lower(self, text):
+        if isinstance(text, str):
+            return text.lower()
+        return text
 
     def __construct_token_dictionaries(self):
         '''
@@ -176,10 +199,10 @@ def test_():
     rd = Data_Reader("/home/stanley/Desktop/train_80k")
     datapath="/home/stanley/Desktop/code_similarity/dictionaries/"
     # save each dictionary to a json file
-    with open(datapath+"type2id.json", "w") as outfile:
-        json.dump(rd.type2id, outfile, indent=2)
-    with open(datapath+"token2id.json", "w") as outfile:
-        json.dump(rd.token2id, outfile, indent=2)
+    # with open(datapath+"type2id.json", "w") as outfile:
+    #     json.dump(rd.type2id, outfile, indent=2)
+    # with open(datapath+"token2id.json", "w") as outfile:
+    #     json.dump(rd.token2id, outfile, indent=2)
 
 if test == True:
     import json

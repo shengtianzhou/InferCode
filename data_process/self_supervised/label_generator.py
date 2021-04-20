@@ -1,7 +1,7 @@
 import data_process.self_supervised.data_reader as data_reader
 import data_process.self_supervised.subtree_generator as subtree_generator
 from tqdm import tqdm
-
+# data_process.self_supervised.
 class LabelGenerator:
     '''
     This class generates the labels for each tree recorded in a data_reader object
@@ -67,7 +67,36 @@ class LabelGenerator:
             # record the total number of subtrees (include duplicates)
             self.subtree_count += len(subtrees)
 
-        # convert subtree_indices to label and add to label
+    
+    def get_pos_weight(self):
+        '''
+        returns a list of positive weights that can be used in the BCEWithLogitsLoss
+        this list is used to resolve class unbalance
+        '''
+        labels_with_duplicate_removed = []
+
+        # construct labels with unique subtrees
+        for label in self.labels:
+            duplicate = []
+            for num in label:
+                if num not in duplicate:
+                    duplicate.append(num)
+            labels_with_duplicate_removed.append(duplicate)
+        
+        # construct the pos and pos_weight list
+        pos = [0] * len(self.subtree2id)
+        pos_weight = [1] * len(self.subtree2id)
+
+        # count unique subtree appearances across all instances, or in short construct pos
+        for label in labels_with_duplicate_removed:
+            for class_id in label:
+                pos[class_id] += 1
+        
+        # construct pos_weight
+        for i in range(0, len(pos_weight)):
+            pos_weight[i] = (len(self.labels) - pos[i]) / pos[i] # weight = neg / pos
+
+        return pos_weight
 
     def __sequentialize_subtree(self, subtree_root):
         '''
@@ -107,6 +136,6 @@ test = False
 if test:
     if __name__=="__main__":
         print("Testing turned on for label_generator")
-        data_reader = data_reader.Data_Reader("/home/stanley/Desktop/dataset_100k_ast")
+        data_reader = data_reader.Data_Reader("/home/stanley/Desktop/test_dataset_100k")
         label_generator = LabelGenerator(data_reader)
         print("The number of unique subtrees in the dataset is :", len(label_generator.subtree2id))

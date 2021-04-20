@@ -6,7 +6,7 @@ import data_process.self_supervised.label_generator as label_generator
 
 class Single_Batch_Loader():
     '''
-    This class is designed to accmodate a large amount of memory usage by the batch loader.
+    This class is designed to accomodate a large amount of memory usage by the batch loader.
     This class meant to create object that loads a single batch of traning data.
     1. batch_of_windowed_tree_node_types
     2. batch_of_windowed_tree_node_tokens

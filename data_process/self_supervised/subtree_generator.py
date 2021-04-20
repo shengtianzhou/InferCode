@@ -10,7 +10,7 @@ class SubtreeGenerator:
     3. a list of subtree roots, each subtree root represents a subtree and is a xml.etree.ElementTree.Element
     4. the total number of nodes in this tree
     '''
-    def __init__(self, base_tree, regular_subtree_root_types = ["expr_stmt", "decl_stmt", "expr_stmt", "condition"], size_1_root_types = ["if", "for", "while"]):
+    def __init__(self, base_tree, regular_subtree_root_types = ["expr_stmt", "decl_stmt", "expr_stmt", "condition"], size_1_root_types = ["if", "for", "while", "if_elseif", "else", "case", "switch", "do"]):
         '''
         base_tree is the ET that can be used to extract subtrees
         subtrees is a list of shallow copies of root elements from ET 
