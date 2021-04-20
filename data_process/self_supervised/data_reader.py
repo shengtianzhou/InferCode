@@ -197,12 +197,12 @@ test = False
 def test_():
 
     rd = Data_Reader("/home/stanley/Desktop/train_80k")
-    datapath="/home/stanley/Desktop/code_similarity/dictionaries/"
+    datapath="/home/stanley/Desktop/dictionaries/v2_dic"
     # save each dictionary to a json file
-    # with open(datapath+"type2id.json", "w") as outfile:
-    #     json.dump(rd.type2id, outfile, indent=2)
-    # with open(datapath+"token2id.json", "w") as outfile:
-    #     json.dump(rd.token2id, outfile, indent=2)
+    with open(datapath+"type2id.json", "w") as outfile:
+        json.dump(rd.type2id, outfile, indent=2)
+    with open(datapath+"token2id.json", "w") as outfile:
+        json.dump(rd.token2id, outfile, indent=2)
 
 if test == True:
     import json

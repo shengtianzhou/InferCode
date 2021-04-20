@@ -55,7 +55,7 @@ def main():
         dimension = 64
         epochs = 15
         #lrate = 0.0025
-        lrate = 0.01
+        lrate = 0.001
         single_batching = True # used to determine prepare batch dataset before training or through the training
 
         # process data
