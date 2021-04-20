@@ -19,7 +19,8 @@ def train1(model, batched_dataset, epochs = 10, lrate = 0.0025):
     optimizer = optim.Adam(model.parameters(), lr = lrate, momentum=0.9)
 
     # declare the loss function, multi-class multi-label classification
-    criterion = torch.nn.BCEWithLogitsLoss() # returns the loss as a 1d tensor
+    pos_weight = torch.tensor(label_generator.get_pos_weight())
+    criterion = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight) # returns the loss as a 1d tensor
 
     for epoch in range(epochs):
         
