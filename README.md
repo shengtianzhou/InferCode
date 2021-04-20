@@ -1,1 +1,1 @@
-# InferCode Variant
+# Self_supervised model
