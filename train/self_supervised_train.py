@@ -19,8 +19,8 @@ def train1(model, batched_dataset, epochs = 10, lrate = 0.0025):
     optimizer = optim.Adam(model.parameters(), lr = lrate, momentum=0.9)
 
     # declare the loss function, multi-class multi-label classification
-    pos_weight = torch.tensor(label_generator.get_pos_weight())
-    criterion = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight) # returns the loss as a 1d tensor
+    # pos_weight = torch.tensor(label_generator.get_pos_weight())
+    criterion = torch.nn.BCEWithLogitsLoss() # returns the loss as a 1d tensor
 
     for epoch in range(epochs):
         
@@ -68,8 +68,8 @@ def train2(model, data_reader, label_generator, batch_size, start_epoch = 0, epo
     optimizer = optim.Adam(model.parameters(), lr = lrate)
 
     # declare the loss function, multi-class multi-label classification
-    pos_weight = torch.tensor(label_generator.get_pos_weight())
-    criterion = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight) # returns the loss as a 1d tensor
+    #pos_weight = torch.tensor(label_generator.get_pos_weight())
+    criterion = torch.nn.BCEWithLogitsLoss() # returns the loss as a 1d tensor
 
     # calculate the total number of batches
     batch_num = math.ceil(data_reader.size / batch_size)
@@ -112,6 +112,6 @@ def train2(model, data_reader, label_generator, batch_size, start_epoch = 0, epo
 
         # save the model at different epochs
         if epoch % 1 == 0:
-             torch.save(model.state_dict(), "/home/stanley/Desktop/momentum_model_weight/epoch_"+str(epoch+1)+".pkl")
+             torch.save(model.state_dict(), "/home/stanley/Desktop/SS-PTM-v2-0.01/epoch_"+str(epoch+1)+".pkl")
 
     return model

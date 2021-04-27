@@ -53,9 +53,9 @@ def main():
         # hyper parameters
         batch_size = 16
         dimension = 64
-        epochs = 15
+        epochs = 22
         #lrate = 0.0025
-        lrate = 0.001
+        lrate = 0.0025
         single_batching = True # used to determine prepare batch dataset before training or through the training
 
         # process data
@@ -74,10 +74,10 @@ def main():
             print(pytorch_total_params)
             
             # load pre-trained weigths and continue training
-            # model_weight_path = "/home/stanley/Desktop/model_weights/epoch_50.pkl"
-            # model.load_state_dict(torch.load(model_weight_path))
+            model_weight_path = "/home/stanley/Desktop/SS-PTM-v2-0.01/epoch_28.pkl"
+            model.load_state_dict(torch.load(model_weight_path))
 
-            model = ss_train.train2(model, dr, lg, batch_size, start_epoch = 0, epochs = epochs, lrate = lrate)
+            model = ss_train.train2(model, dr, lg, batch_size, start_epoch = 28, epochs = epochs, lrate = lrate)
 
         else:    
             print("Total_batching training: ")
