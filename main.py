@@ -8,13 +8,16 @@ import sys
 import torch.nn as nn
 import torch.optim as optim
 import torch
+import pickle
 
 # import InferCode
 import data_process.self_supervised.data_reader as data_reader
 import data_process.self_supervised.batch_loader as batch_loader
 import data_process.self_supervised.label_generator as label_generator
 import models.self_supervised.model as ss_model
+import models.self_supervised.model_neg as ss_model_neg
 import train.self_supervised_train as ss_train
+import data_process.self_supervised.batch_loader_v2 as batch_loader_v2
 
 def get_args():
 
@@ -85,6 +88,36 @@ def main():
             model = ss_train.train1(model, batched_dataset, epochs, lrate)
 
         print("Training Done")
+    
+    if args.Preprocess[1] == "ss2" and args.Train[0] == "ss2":
+
+        batch_size = 2
+        dimension = 32
+        start_epoch = 0
+        epochs = 10
+        lrate = 0.0025
+
+        # load the batch loader file
+        data_path = args.Preprocess[0]
+
+        # Load batch data
+        print("Loading training dataset loader")
+        with open(data_path, 'rb') as file:
+            batch_loader = pickle.load(file)
+        print("Data loading done")
+
+        # dr = data_reader.Data_Reader(data_path)
+        # lg = label_generator.LabelGenerator(dr)
+        # batch_loader = batch_loader_v2.Batch_Loader_V2(dr,lg,5)
+
+        # model
+        model = ss_model_neg.InferCode(len(batch_loader.data_reader.id2type), len(batch_loader.data_reader.id2token), len(batch_loader.label_generator.subtree2id), dimension)
+        pytorch_total_params = sum(p.numel() for p in model.parameters())
+
+        print(pytorch_total_params)
+    
+        # start training
+        model = ss_train.train3(model, batch_loader, batch_size, start_epoch = start_epoch, epochs = epochs, lrate = lrate)
 
 if __name__ == "__main__":
 

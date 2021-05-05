@@ -106,7 +106,7 @@ class Single_Batch_Loader():
                     
                 # calculate the coefficients for child nodes
                 child_eta_t = self.__eta_t(1) # di will always be 1 assumming using window size of 2, which is the default for many state of the art systems
-                child_eta_r = self.__eta_r(child_eta_t, child_index+1,len(node)) # len(node) is the number of direct children of
+                child_eta_r = self.__eta_r(child_eta_t, child_index+1,len(node)) # len(node) is the number of direct children of parent
                 child_eta_l = self.__eta_l(child_eta_t, child_eta_r)
 
                 eta_t.append(child_eta_t) 
