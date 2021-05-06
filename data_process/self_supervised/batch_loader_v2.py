@@ -79,24 +79,20 @@ class Batch_Loader_V2:
         # generate the pn indices for each positive subtree in subtree_index
 
         # sequential
+        target = [idx for idx in range(0, len(self.label_generator.subtree2id))]
 
         # single core process
-        # for mask_index, pos_subtree_id in enumerate(tqdm(self.subtree_index, desc = "Generate Negative Examples ")):
+        for mask_index, pos_subtree_id in enumerate(tqdm(self.subtree_index, desc = "Generate Negative Examples ")):
                 
-        #     # declare the list to contain a positve subtree id and negative_sample_size neagtive subtree ids
-        #     pn_list = []
-        #     pn_list.append(pos_subtree_id) # add the positve subtree id at index 0
+            # declare the list to contain a positve subtree id and negative_sample_size neagtive subtree ids
+            pn_list = []
+            pn_list.append(pos_subtree_id) # add the positve subtree id at index 0
 
-        #     # create the removal list
-        #     which_label = self.tree_mask_index[mask_index]
-        #     label = self.label_generator.labels[which_label]
-        #     removal_list = self.get_unique_label(label)
-                
-        #     # create negative subtree id list
-        #     pn_list.extend(self.select_negative_samples(removal_list))
+            # add negative example from negative distribution
+            pn_list.extend(random.sample(target, self.negative_sample_size))
 
-        #     # append to dataset
-        #     self.batch_pn_indices.append(pn_list)
+            # append to dataset
+            self.batch_pn_indices.append(pn_list)
 
 
         return
@@ -172,8 +168,10 @@ class Batch_Loader_V2:
         batched_window_eta_l = []
         batched_window_eta_r = []
 
-        batched_tree_indices = []
+        batched_tree_node_indices = [] # batch node size
         
+        batched_tree_indices = []
+
         batched_pn_indices = []
 
         batched_labels = []
@@ -190,9 +188,11 @@ class Batch_Loader_V2:
         # tree index
         tree_addition = 0
 
-        for idx in range(start_index, end_index):
-            tree_idx = self.tree_mask_index[idx]
-            
+        # find unique tree index
+        unique_tree_indices = list(set(self.tree_mask_index[start_index : end_index]))
+        
+        for tree_idx in unique_tree_indices:
+
             # batched tree node and token information
             batched_window_node_type.extend(self.windowed_tree_node_types[tree_idx])
             batched_window_node_token.extend(self.windowed_tree_node_token[tree_idx])
@@ -209,17 +209,30 @@ class Batch_Loader_V2:
 
             # batched tree indices
             tree_indices = [tree_addition] * num_node
-            batched_tree_indices.extend(tree_indices)
+            batched_tree_node_indices.extend(tree_indices)
             tree_addition = tree_addition + 1
 
-            # batched labels
-            label = [1]
-            label.extend([0] * self.negative_sample_size)
+        # batched labels and batched_tree_indices
+        label = [1]
+        label.extend([0] * self.negative_sample_size)
+        tree_index = 0
+        tree_record_index = self.tree_mask_index[start_index]
+
+        for itr in range(start_index, end_index):
             batched_labels.append(label)
+
+            if self.tree_mask_index[itr] == tree_record_index:
+                batched_tree_indices.append(tree_index)
+            else:
+                tree_index = tree_index + 1
+                tree_record_index = self.tree_mask_index[itr]
+                batched_tree_indices.append(tree_index)
+
         
+        # batched pn indices
         batched_pn_indices = self.batch_pn_indices[start_index : end_index]
 
-        return batched_window_node_type, batched_window_node_token, batched_window_node_indices, batched_window_eta_t, batched_window_eta_l, batched_window_eta_r, batched_tree_indices, batched_pn_indices, batched_labels
+        return batched_window_node_type, batched_window_node_token, batched_window_node_indices, batched_window_eta_t, batched_window_eta_l, batched_window_eta_r, batched_tree_node_indices, batched_tree_indices, batched_pn_indices, batched_labels
 
     def select_negative_samples(self, unique_subtree_ids):
         '''

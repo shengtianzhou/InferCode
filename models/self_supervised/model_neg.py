@@ -34,30 +34,31 @@ class InferCode(nn.Module):
         # subtree embedding
         self.embedding_subtree = nn.Embedding(subtree_size, dim)
 
-    def forward(self, type_batch, token_batch, node_indices, eta_t, eta_l, eta_r, tree_indices, pn_indices):
+    def forward(self, type_batch, token_batch, node_indices, eta_t, eta_l, eta_r, tree_node_indices, tree_indices, pn_indices):
         ''' 
         For a batch, this forward function produces the possiblities of subtrees for each code snippet
         N is the number of windowed_tree nodes in a batch
         dim is the dimension size
         n is the number of tree nodes in a batch
-        T is the batch size, indicating the number of trees in a batch
+        num_trees is the nummber of trees
         neg is the number of pn subtree size
+        T is the batch size
         '''
         # produce node hidden state, N * dim
         hidden_state = self.__get_node_hidden_state(type_batch, token_batch)
-
+        
         # tree based convolution, n * dim
         convoluted_node_embedding = self.__get_convoluted_result(hidden_state, node_indices, eta_t, eta_l, eta_r)
-
-        # code vector generation, T * dim
-        code_vectors = self.__get_code_vectors(convoluted_node_embedding, tree_indices)
-
-        # retreive pn embedding, T * neg * dim
+        
+        # code vector generation, num_trees * dim
+        unique_code_vectors = self.__get_code_vectors(convoluted_node_embedding, tree_node_indices)
+        
+        # retreive pn embedding, num_trees * neg * dim
         subtree_vectors = self.embedding_subtree(pn_indices)
-
+        
         # for each positive and negative subtree, compute the logits with regard to that tree, T * neg
-        logits = self.__get_logits(code_vectors, subtree_vectors)
-
+        logits = self.__get_logits(unique_code_vectors, tree_indices, subtree_vectors)
+        
         return logits
 
     def __get_node_hidden_state(self, type_batch, token_batch):
@@ -103,30 +104,35 @@ class InferCode(nn.Module):
 
         return convoluted_node_embedding
 
-    def __get_code_vectors(self, convoluted_node_embedding, tree_indices):
+    def __get_code_vectors(self, convoluted_node_embedding, tree_node_indices):
         '''
         produces code vectors for a batch of trees, each code vector is of dimension dim
         convoluted_node_embedding: shape is of n * dim
-        tree_indices: shape is of n
-        output should be of shape T * dim
+        tree_node_indices: shape is of n
+        output should be of shape num_trees * dim
         '''
         # calculate weight (apha_i) for each convoluted tree node embedding
         intermediate_result = torch.matmul(convoluted_node_embedding, self.alpha.unsqueeze(1)) # n * 1
-        alpha_i = scatter_softmax(intermediate_result.squeeze(), tree_indices).unsqueeze(1) # n * 1
+        alpha_i = scatter_softmax(intermediate_result.squeeze(), tree_node_indices).unsqueeze(1) # n * 1
 
         # multiply the weight to each convoluted tree node embedding n * dim
         res = torch.bmm(convoluted_node_embedding.unsqueeze(2), alpha_i.unsqueeze(2)).squeeze()
 
-        # scatter add to produce code vectors, T * dim
-        code_vectors = scatter_add(res, tree_indices, dim = 0)
+        # scatter add to produce code vectors, num_trees * dim
+        code_vectors = scatter_add(res, tree_node_indices, dim = 0)
 
         return code_vectors
 
-    def __get_logits(self, code_vectors, subtree_vectors):
+    def __get_logits(self, unique_code_vectors, tree_indices, subtree_vectors):
         '''
-        code_vectors: shape is of T * dim
-        subtree_vectors: shape is of T * neg * dim
+        unique code_vectors: shape is of tree_size * dim
+        tree_indices: shape is num_trees
+        subtree_vectors: shape is of num_trees * neg * dim
         '''
+        
+        # populate code_vectors, T * dim
+        code_vectors = unique_code_vectors[tree_indices]
+
         # T * subtree_size
         logits = torch.bmm(subtree_vectors, code_vectors.unsqueeze(2)).squeeze()
 
@@ -143,7 +149,7 @@ if test:
         model = InferCode(10, 20, 50, dim = 5)
 
         # declare test parameters
-        # forward(self, type_batch, token_batch, node_indices, eta_t, eta_l, eta_r, tree_indices):
+        # forward(self, type_batch, token_batch, node_indices, eta_t, eta_l, eta_r, tree_node_indices):
         type_batch = torch.ones(10).long() # long
         token_batch = torch.ones(10).long() # long
         node_indices = torch.tensor([0,0,1,1,2,2,3,3,4,4]) # long
@@ -152,6 +158,6 @@ if test:
         eta_r = torch.ones(10) # float
 
         # assume 0, 1, 2 nodes are a tree, 3, 4 nodes are a tree
-        tree_indices = torch.tensor([0,0,0,1,1]) # long
+        tree_node_indices = torch.tensor([0,0,0,1,1]) # long
 
-        output = model(type_batch, token_batch, node_indices, eta_t, eta_l, eta_r, tree_indices)
+        output = model(type_batch, token_batch, node_indices, eta_t, eta_l, eta_r, tree_node_indices)

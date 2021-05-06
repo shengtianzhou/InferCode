@@ -56,7 +56,7 @@ def main():
         # hyper parameters
         batch_size = 16
         dimension = 64
-        epochs = 22
+        epochs = 10
         #lrate = 0.0025
         lrate = 0.0025
         single_batching = True # used to determine prepare batch dataset before training or through the training
@@ -77,10 +77,10 @@ def main():
             print(pytorch_total_params)
             
             # load pre-trained weigths and continue training
-            model_weight_path = "/home/stanley/Desktop/SS-PTM-v2-0.01/epoch_28.pkl"
-            model.load_state_dict(torch.load(model_weight_path))
+            # model_weight_path = "/home/stanley/Desktop/SS-PTM-v2-0.01/epoch_28.pkl"
+            # model.load_state_dict(torch.load(model_weight_path))
 
-            model = ss_train.train2(model, dr, lg, batch_size, start_epoch = 28, epochs = epochs, lrate = lrate)
+            model = ss_train.train2(model, dr, lg, batch_size, start_epoch = 0, epochs = epochs, lrate = lrate)
 
         else:    
             print("Total_batching training: ")
@@ -91,30 +91,25 @@ def main():
     
     if args.Preprocess[1] == "ss2" and args.Train[0] == "ss2":
 
-        batch_size = 2
-        dimension = 32
+        batch_size = 64
+        dimension = 64
         start_epoch = 0
-        epochs = 10
+        epochs = 100
         lrate = 0.0025
+        neg = 5
 
         # load the batch loader file
         data_path = args.Preprocess[0]
 
-        # Load batch data
-        print("Loading training dataset loader")
-        with open(data_path, 'rb') as file:
-            batch_loader = pickle.load(file)
-        print("Data loading done")
-
-        # dr = data_reader.Data_Reader(data_path)
-        # lg = label_generator.LabelGenerator(dr)
-        # batch_loader = batch_loader_v2.Batch_Loader_V2(dr,lg,5)
+        dr = data_reader.Data_Reader(data_path)
+        lg = label_generator.LabelGenerator(dr)
+        batch_loader = batch_loader_v2.Batch_Loader_V2(dr,lg,neg)
 
         # model
         model = ss_model_neg.InferCode(len(batch_loader.data_reader.id2type), len(batch_loader.data_reader.id2token), len(batch_loader.label_generator.subtree2id), dimension)
         pytorch_total_params = sum(p.numel() for p in model.parameters())
 
-        print(pytorch_total_params)
+        print("The number of model parameters: ", pytorch_total_params)
     
         # start training
         model = ss_train.train3(model, batch_loader, batch_size, start_epoch = start_epoch, epochs = epochs, lrate = lrate)

@@ -2,6 +2,7 @@ import data_process.self_supervised.data_reader as data_reader
 import data_process.self_supervised.batch_loader as batch_loader
 import data_process.self_supervised.label_generator as label_generator
 import models.self_supervised.model as ss_model
+import models.self_supervised.model_neg as ss_neg_model
 from torch_scatter import scatter_softmax
 from torch_scatter import scatter_add
 import numpy as np
@@ -13,7 +14,7 @@ class InferCode_Inference:
     This class loads a self-supervised InferCode pretask model and provide the code2vec function for producing an embedding for a code snippet.
     Assume the given code snippet is a xml file that corresponds to the ast produced by srcML
     '''
-    def __init__(self, model_weight_path, token2id_path, type2id_path, subtree_count, dimension):
+    def __init__(self, model_weight_path, token2id_path, type2id_path, subtree_count, dimension, model_choice = 1):
         
         self.model_path = model_weight_path
         self.token2id_path = token2id_path
@@ -22,6 +23,7 @@ class InferCode_Inference:
         self.dimension = dimension
 
         self.model = None
+        self.model_choice = model_choice # 1 if ss_neg_model, 2 is ss_model
         self.token2id = {}
         self.type2id = {}
 
@@ -35,7 +37,10 @@ class InferCode_Inference:
         with open(self.type2id_path) as f:
             self.type2id = json.load(f)
 
-        self.model = ss_model.InferCode(len(self.type2id), len(self.token2id)+1, self.subtree_count, self.dimension)
+        if self.model_choice == 1:
+            self.model = ss_neg_model.InferCode(len(self.type2id), len(self.token2id)+1, self.subtree_count, self.dimension)
+        elif self.model_choice == 2:
+            self.model = ss_model.InferCode(len(self.type2id), len(self.token2id)+1, self.subtree_count, self.dimension)
 
         self.model.load_state_dict(torch.load(self.model_path))
     

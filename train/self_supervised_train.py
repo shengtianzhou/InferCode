@@ -111,8 +111,8 @@ def train2(model, data_reader, label_generator, batch_size, start_epoch = 0, epo
         print("epoch", epoch, "loss : ", epoch_loss.item())
 
         # save the model at different epochs
-        if epoch % 1 == 0:
-             torch.save(model.state_dict(), "/home/stanley/Desktop/SS-PTM-v2-0.01/epoch_"+str(epoch+1)+".pkl")
+        # if epoch % 1 == 0:
+        #      torch.save(model.state_dict(), "/home/stanley/Desktop/SS-PTM-v2-0.01/epoch_"+str(epoch+1)+".pkl")
 
     return model
 
@@ -136,44 +136,53 @@ def train3(model, batch_loader, batch_size, start_epoch = 0, epochs = 10, lrate 
     # calculate the total number of batches
     batch_num = math.ceil(batch_loader.num_train / batch_size)
     
+    # create the batched dataset
+    
+    all_data = []
+    for batch_idx in tqdm(range(batch_num), desc = "Creating batch_data:"):
+        all_data.append(batch_loader.retrieve_batch(batch_idx, batch_size))
+
     for epoch in range(start_epoch, start_epoch + epochs):
         
         epoch_loss = 0
 
         for batch_idx in tqdm(range(batch_num), desc = "Training Epoch " + str(epoch) + " : "):
-            # # load the batch from main memory
-            bl = batch_loader.retrieve_batch(batch_idx, batch_size = batch_size)
 
             # convert batched data to torch tensor with the appropriate dtype, and put them on the gpu assume gpu is available
-            batch_window_tree_node_types = torch.tensor(bl[0]).long().to(device)
+            batch_window_tree_node_types = torch.tensor(all_data[batch_idx][0]).long().to(device)
             
-            batch_window_tree_node_tokens = torch.tensor(bl[1]).long().to(device)
+            batch_window_tree_node_tokens = torch.tensor(all_data[batch_idx][1]).long().to(device)
             
-            batch_window_tree_node_indices = torch.tensor(bl[2]).long().to(device)
+            batch_window_tree_node_indices = torch.tensor(all_data[batch_idx][2]).long().to(device)
             
-            batch_eta_t = torch.tensor(bl[3]).float().to(device)
-            batch_eta_l = torch.tensor(bl[4]).float().to(device) 
-            batch_eta_r = torch.tensor(bl[5]).float().to(device)
+            batch_eta_t = torch.tensor(all_data[batch_idx][3]).float().to(device)
+            batch_eta_l = torch.tensor(all_data[batch_idx][4]).float().to(device) 
+            batch_eta_r = torch.tensor(all_data[batch_idx][5]).float().to(device)
             
-            batch_tree_indices = torch.tensor(bl[6]).long().to(device)
+            batch_tree_node_indices = torch.tensor(all_data[batch_idx][6]).long().to(device)
             
-            batch_bn_indices = torch.tensor(bl[7]).long().to(device)
-            
-            batch_label = torch.tensor(bl[8]).float().to(device)
+            batch_tree_indices = torch.tensor(all_data[batch_idx][7]).long().to(device)
 
+            batch_bn_indices = torch.tensor(all_data[batch_idx][8]).long().to(device)
+            
+            batch_label = torch.tensor(all_data[batch_idx][9]).float().to(device)
+
+            # print("batch id: ", batch_idx)
             # print(batch_window_tree_node_types.shape)
             # print(batch_window_tree_node_tokens.shape)
             # print(batch_window_tree_node_indices.shape)
             # print(batch_eta_t.shape)
             # print(batch_eta_l.shape)
             # print(batch_eta_r.shape)
+            # print(batch_tree_node_indices.shape)
             # print(batch_tree_indices.shape)
             # print(batch_bn_indices.shape)
             # print(batch_label.shape)
+            
 
             # training
-            out = model(batch_window_tree_node_types, batch_window_tree_node_tokens, batch_window_tree_node_indices, batch_eta_t, batch_eta_l, batch_eta_r, batch_tree_indices, batch_bn_indices)
-            
+            out = model(batch_window_tree_node_types, batch_window_tree_node_tokens, batch_window_tree_node_indices, batch_eta_t, batch_eta_l, batch_eta_r, batch_tree_node_indices, batch_tree_indices, batch_bn_indices)
+
             optimizer.zero_grad()
             loss = criterion(out, batch_label.squeeze())
             loss.backward()
