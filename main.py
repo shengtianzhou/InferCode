@@ -91,11 +91,11 @@ def main():
     
     if args.Preprocess[1] == "ss2" and args.Train[0] == "ss2":
 
-        batch_size = 64
+        batch_size = 32
         dimension = 64
         start_epoch = 0
-        epochs = 100
-        lrate = 0.0025
+        epochs = 200
+        lrate = 0.001
         neg = 5
 
         # load the batch loader file

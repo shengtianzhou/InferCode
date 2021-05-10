@@ -167,19 +167,6 @@ def train3(model, batch_loader, batch_size, start_epoch = 0, epochs = 10, lrate 
             
             batch_label = torch.tensor(all_data[batch_idx][9]).float().to(device)
 
-            # print("batch id: ", batch_idx)
-            # print(batch_window_tree_node_types.shape)
-            # print(batch_window_tree_node_tokens.shape)
-            # print(batch_window_tree_node_indices.shape)
-            # print(batch_eta_t.shape)
-            # print(batch_eta_l.shape)
-            # print(batch_eta_r.shape)
-            # print(batch_tree_node_indices.shape)
-            # print(batch_tree_indices.shape)
-            # print(batch_bn_indices.shape)
-            # print(batch_label.shape)
-            
-
             # training
             out = model(batch_window_tree_node_types, batch_window_tree_node_tokens, batch_window_tree_node_indices, batch_eta_t, batch_eta_l, batch_eta_r, batch_tree_node_indices, batch_tree_indices, batch_bn_indices)
 
@@ -190,13 +177,10 @@ def train3(model, batch_loader, batch_size, start_epoch = 0, epochs = 10, lrate 
 
             epoch_loss += loss
             
-            # del loss
-            # del out
-            # print("epoch", epoch, "batch", batch_idx, " trained")
         print("epoch", epoch, "loss : ", epoch_loss.item())
 
         # save the model at different epochs
-        if epoch % 1 == 0:
-             torch.save(model.state_dict(), "/home/stanley/Desktop/SSPTM-neg_v1/epoch_"+str(epoch+1)+".pkl")
+        if epoch % 5 == 0:
+             torch.save(model.state_dict(), "/home/stanley/Desktop/SSPTM-neg_b32/epoch_"+str(epoch)+".pkl")
 
     return model
