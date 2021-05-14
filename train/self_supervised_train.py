@@ -5,7 +5,7 @@ import torch.optim as optim
 import data_process.self_supervised.single_batch_loader as single_batch_loader
 
 # training from batch_loader if the dataset is small enough
-def train1(model, batched_dataset, epochs = 10, lrate = 0.0025):
+def train1(model, batched_dataset, destination, epochs = 10, lrate = 0.0025):
     
     # check if cuda device is available, if so, use gpu, otherwise use cpu
     if torch.cuda.is_available():
@@ -51,10 +51,13 @@ def train1(model, batched_dataset, epochs = 10, lrate = 0.0025):
 
             epoch_loss += loss
         print("epoch", epoch, "loss : ", epoch_loss.item())
+        if epoch % 1 == 0:
+             torch.save(model.state_dict(), destination+"/epoch_"+str(epoch)+".pkl")
+
     return model
 
 # training using single_batch_loader when dataset is too big
-def train2(model, data_reader, label_generator, batch_size, start_epoch = 0, epochs = 10, lrate = 0.0025):
+def train2(model, data_reader, label_generator, batch_size, destination, start_epoch = 0, epochs = 10, lrate = 0.0025):
     
     # check if cuda device is available, if so, use gpu, otherwise use cpu
     if torch.cuda.is_available():
@@ -111,12 +114,12 @@ def train2(model, data_reader, label_generator, batch_size, start_epoch = 0, epo
         print("epoch", epoch, "loss : ", epoch_loss.item())
 
         # save the model at different epochs
-        # if epoch % 1 == 0:
-        #      torch.save(model.state_dict(), "/home/stanley/Desktop/SS-PTM-v2-0.01/epoch_"+str(epoch+1)+".pkl")
+        if epoch % 1 == 0:
+             torch.save(model.state_dict(), destination+"/epoch_"+str(epoch)+".pkl")
 
     return model
 
-def train3(model, batch_loader, batch_size, start_epoch = 0, epochs = 10, lrate = 0.0025):
+def train3(model, batch_loader, batch_size, destination, start_epoch = 0, epochs = 10, lrate = 0.0025):
     
     # check if cuda device is available, if so, use gpu, otherwise use cpu
     if torch.cuda.is_available():
@@ -180,7 +183,7 @@ def train3(model, batch_loader, batch_size, start_epoch = 0, epochs = 10, lrate 
         print("epoch", epoch, "loss : ", epoch_loss.item())
 
         # save the model at different epochs
-        if epoch % 5 == 0:
-             torch.save(model.state_dict(), "/home/stanley/Desktop/SSPTM-neg_b32/epoch_"+str(epoch)+".pkl")
+        if epoch % 1 == 0:
+             torch.save(model.state_dict(), destination+"/epoch_"+str(epoch)+".pkl")
 
     return model

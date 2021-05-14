@@ -1,0 +1,7 @@
+{
+  "batch_size": 32,
+  "dimension": 64,
+  "epochs": 1,
+  "lrate": 0.001,
+  "negative_examples": 5
+}

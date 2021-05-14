@@ -1,0 +1,7 @@
+{
+  "batch_size": 16,
+  "dimension": 64,
+  "epochs": 10,
+  "lrate": 0.0025,
+  "single_batching": 1
+}

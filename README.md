@@ -17,10 +17,12 @@ torch_scatter 2.0.4
 
 cudatoolkit 10.1
 
-## train a model
-Python -Preprocess "path to training folder" ss -Train ss
+## Train a model
+~~~
+sh train.sh
+~~~
 
-### note this repo is not refactored, the destination folder can be specified in train/self_supervised_train.py around line 115
+note this repo is not refactored, the destination folder can be specified in train/self_supervised_train.py around line 115
 
-# Inference
+## Inference
 For use the model, please check out the inference.ipynb file, it has all the information.

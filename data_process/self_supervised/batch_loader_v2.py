@@ -9,15 +9,6 @@ import multiprocessing as mp
 class Batch_Loader_V2:
     '''
     The Batch_Loader_V2 class provides batched data for the 2nd version of SS-PTM model. This loader is intended to reduce the training difficulty and enable training on large datasets
-    1. batches_of_windowed_tree_node_types, a list, each windowed tree node is a node in a convolution window described in the tbcnn paper https://arxiv.org/abs/1409.5718v1
-    2. batches_of_windowed_tree_node_tokens, a list
-    3. batches_of_windowed_tree_node_indices, a list, each batch index sublist will be consumed by PyTorch scatter_add to aggregate window information
-    4. batches_of_eta_t, a list, this is requrired by the tbcnn algorithm
-    5. batches_of_eta_l, a list
-    6. batches_of_eta_r, a list
-    7. batches_of_tree_indices, a list, each batch index sublist will be consumed by PyTorch scatter_add to aggregate a tree information (producing a code vector)
-    8. batches_of_pn_indices, a list of batches, each batch has the index of the postive subtree and indices of negative subtrees 
-    9. batches_of_labels, a list of batches, each batch contains the corresponding label indicating which subtree is positve and which is negative
     '''
 
     def __init__(self, data_reader, label_generator, negative_sample_size = 5):
@@ -233,28 +224,6 @@ class Batch_Loader_V2:
         batched_pn_indices = self.batch_pn_indices[start_index : end_index]
 
         return batched_window_node_type, batched_window_node_token, batched_window_node_indices, batched_window_eta_t, batched_window_eta_l, batched_window_eta_r, batched_tree_node_indices, batched_tree_indices, batched_pn_indices, batched_labels
-
-    def select_negative_samples(self, unique_subtree_ids):
-        '''
-        return a random list of subtree indices that are not in the unique_subtree_ids
-        '''
-        # create the target list to select from, the target list is a list of index of unique subtrees
-        target = [idx for idx in range(0, len(self.label_generator.subtree2id))]
-
-        # remove all unique subtrees from the target list 
-        negative_subtrees = self.__remove_from_list(target, unique_subtree_ids)
-
-        # select self.negative_sample_size negative subtree ids from target
-        negative_ids = random.sample(negative_subtrees, self.negative_sample_size)
-
-        return negative_ids
-
-    def __remove_from_list(self, target, removal):
-        '''
-        remove all items from removal from target
-        target and removal are number list
-        '''
-        return list(set(target) - set(removal))
 
     def __eta_t(self, di, d=2):
         return (di - 1) / (d - 1)
