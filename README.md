@@ -22,7 +22,5 @@ cudatoolkit 10.1
 sh train.sh
 ~~~
 
-note this repo is not refactored, the destination folder can be specified in train/self_supervised_train.py around line 115
-
 ## Inference
 For use the model, please check out the inference.ipynb file, it has all the information.
