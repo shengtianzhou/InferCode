@@ -1,4 +1,4 @@
-# Self_supervised model
+# Self_supervised pre-task model (SS-PTM)
 
 ## Python version I used
 
