@@ -23,4 +23,4 @@ sh train.sh
 ~~~
 
 ## Inference
-For use the model, please check out the inference.ipynb file, it has all the information.
+For usage of the models, please check out the inference.ipynb file, it has an example.
